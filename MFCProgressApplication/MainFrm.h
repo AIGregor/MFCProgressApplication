@@ -8,6 +8,13 @@
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
 
+class CProgresDialog;
+
+#define STOP_CALCULATION (WM_USER + 12)
+#define CM_START_LOCAL_CALCULATION (WM_USER + 13)
+
+DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter);
+
 class CMainFrame : public CMDIFrameWndEx
 {
 	DECLARE_DYNAMIC(CMainFrame)
@@ -33,6 +40,9 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	void CalculationProc();
+	void InitProgressBarDlg();
+
 protected:  // встроенные члены панели элементов управления
 	CMFCMenuBar       m_wndMenuBar;
 	CMFCToolBar       m_wndToolBar;
@@ -43,12 +53,19 @@ protected:  // встроенные члены панели элементов управления
 	COutputWnd        m_wndOutput;
 	CPropertiesWnd    m_wndProperties;
 
+	bool			  m_bStopCalculation;
+
+	CProgresDialog*	  pProgressBarDlg;
+	HANDLE m_ThreadID;
 // Созданные функции схемы сообщений
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnWindowManager();
 	afx_msg void OnViewCustomize();
 	afx_msg LRESULT OnToolbarCreateNew(WPARAM wp, LPARAM lp);
+
+	afx_msg LRESULT OnStopCalc(WPARAM wp, LPARAM lp);
+
 	afx_msg void OnApplicationLook(UINT id);
 	afx_msg void OnUpdateApplicationLook(CCmdUI* pCmdUI);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
@@ -56,6 +73,12 @@ protected:
 
 	BOOL CreateDockingWindows();
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
+
+public:
+	afx_msg void OnStartCalc();
+	afx_msg void OnStartLocalCalc();
+protected:
+	afx_msg LRESULT OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam);
 };
 
 

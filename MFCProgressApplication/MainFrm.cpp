@@ -7,6 +7,8 @@
 
 #include "MainFrm.h"
 
+#include "ProgresDialog.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -27,6 +29,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnApplicationLook)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
 	ON_WM_SETTINGCHANGE()
+	ON_COMMAND(ID_START_CALC, &CMainFrame::OnStartCalc)
+	ON_COMMAND(ID_START_LOCAL_CALC, &CMainFrame::OnStartLocalCalc)
+	ON_MESSAGE(STOP_CALCULATION, &CMainFrame::OnStopCalc)
+	ON_MESSAGE(CM_START_LOCAL_CALCULATION, &CMainFrame::OnCmStartlocalcalc)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -316,6 +322,13 @@ LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp,LPARAM lp)
 	return lres;
 }
 
+LRESULT CMainFrame::OnStopCalc(WPARAM wp, LPARAM lp)
+{
+	TRACE("Received message!");
+	m_bStopCalculation = true;
+	return LRESULT();
+}
+
 void CMainFrame::OnApplicationLook(UINT id)
 {
 	CWaitCursor wait;
@@ -426,4 +439,102 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CMDIFrameWndEx::OnSettingChange(uFlags, lpszSection);
 	m_wndOutput.UpdateFonts();
+}
+
+//---------------------------------------------------------------
+
+void CMainFrame::InitProgressBarDlg()
+{
+	pProgressBarDlg = new CProgresDialog(this);
+	BOOL ret = pProgressBarDlg->Create(IDD_PROGRESDIALOG);
+	if (!ret)
+	{
+		AfxMessageBox(_T("Error creating Dialog"));
+		delete pProgressBarDlg;
+	}
+	pProgressBarDlg->ShowWindow(SW_SHOW);
+	pProgressBarDlg->CenterWindow(AfxGetMainWnd());
+	//CFrameWnd* pMainFrame = GetParentFrame();
+	//this->EnableWindow(FALSE);
+	pProgressBarDlg->EnableWindow(TRUE);
+}
+
+
+DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter)
+{
+	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
+	pThis->CalculationProc();
+	return 0;
+}
+
+void CMainFrame::OnStartCalc()
+{
+	DWORD mythreadid;
+	InitProgressBarDlg();
+	m_ThreadID = CreateThread(0, 0, CalculationRoutine, this, 0, &mythreadid);
+	// TODO: Add your command handler code here
+}
+
+void CMainFrame::CalculationProc()
+{
+	m_bStopCalculation = false;
+	int i = 0;
+	MSG msg;
+
+	while (i < 100)
+	{
+		++i;
+		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+		Sleep(100);
+		
+		//bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
+		//while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+		//{
+			if (m_bStopCalculation)
+			{
+				break;
+			}
+		//}
+		
+	}
+
+	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	this->EnableWindow(TRUE);
+}
+
+void CMainFrame::OnStartLocalCalc()
+{
+	InitProgressBarDlg();
+	
+	::PostMessage(GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+}
+
+
+afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
+{
+	int i = 0;
+	MSG msg;
+
+	while (i < 100)
+	{
+		++i;
+		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+		Sleep(100);
+		/*
+		bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
+		if (peekMess)
+		{
+			if (msg.message == STOP_CALCULATION)
+			{
+				return;
+			}
+		}
+		*/
+	}
+
+	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	this->EnableWindow(TRUE);
+	// TODO: Add your command handler code here
+
+	return 0;
 }
