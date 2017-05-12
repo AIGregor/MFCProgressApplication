@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_COMMAND(ID_START_LOCAL_CALC, &CMainFrame::OnStartLocalCalc)
 	ON_MESSAGE(STOP_CALCULATION, &CMainFrame::OnStopCalc)
 	ON_MESSAGE(CM_START_LOCAL_CALCULATION, &CMainFrame::OnCmStartlocalcalc)
+	ON_COMMAND(ID_START_UITHREAD, &CMainFrame::OnStartUithread)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -455,7 +456,7 @@ void CMainFrame::InitProgressBarDlg()
 	pProgressBarDlg->ShowWindow(SW_SHOW);
 	pProgressBarDlg->CenterWindow(AfxGetMainWnd());
 	//CFrameWnd* pMainFrame = GetParentFrame();
-	this->EnableWindow(FALSE);
+	//this->EnableWindow(FALSE);
 	pProgressBarDlg->EnableWindow(TRUE);
 }
 
@@ -463,15 +464,17 @@ void CMainFrame::InitProgressBarDlg()
 DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter)
 {
 	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
-	pThis->CalculationProc();
+	//pThis->CalculationProc();
+	pThis->InitProgressBarDlg();
 	return 0;
 }
 
 void CMainFrame::OnStartCalc()
 {
 	DWORD mythreadid;
-	InitProgressBarDlg();
+	//InitProgressBarDlg();
 	m_ThreadID = CreateThread(0, 0, CalculationRoutine, this, 0, &mythreadid);
+	CalculationProc();
 	// TODO: Add your command handler code here
 }
 
@@ -484,7 +487,7 @@ void CMainFrame::CalculationProc()
 	while (i < 100)
 	{
 		++i;
-		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 		
 		if (i % 10 == 0) 
@@ -506,7 +509,7 @@ void CMainFrame::CalculationProc()
 		
 	}
 
-	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
 	this->EnableWindow(TRUE);
 }
 
@@ -525,6 +528,7 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 	while (i < 100)
 	{
 		++i;
+
 		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 		
@@ -546,4 +550,24 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 	// TODO: Add your command handler code here
 
 	return 0;
+}
+
+
+void CMainFrame::OnStartUithread()
+{
+	// TODO: Add your command handler code here
+	// Вызов диалога с прогресс баром через user - interface thread 
+	//if (m_pMyUIThread == NULL)
+	//{
+		m_pMyUIThread = new CMyUIThread();
+		m_pMyUIThread->m_bAutoDelete = FALSE;
+		m_pMyUIThread->SetParent(this);
+
+		m_pMyUIThread->CreateThread();
+		
+		CalculationProc();
+		// не ясно зачем ??
+		//CWnd* pWnd = GetDlgItem(IDOK);
+		//pWnd->EnableWindow(FALSE);
+	//}
 }

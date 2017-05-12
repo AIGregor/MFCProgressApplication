@@ -308,6 +308,7 @@ BEGIN
     BEGIN
         MENUITEM "Начать вычисления в новом потоке", ID_START_CALC
         MENUITEM "Начать вычисления в текущем потоке", ID_START_LOCAL_CALC
+        MENUITEM "Начать через UIThread",       ID_START_UITHREAD
     END
 END
 

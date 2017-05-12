@@ -8,6 +8,8 @@
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
 
+#include "MyUIThread.h"
+
 class CProgresDialog;
 
 #define STOP_CALCULATION (WM_USER + 12)
@@ -57,6 +59,8 @@ protected:  // встроенные члены панели элементов управления
 
 	CProgresDialog*	  pProgressBarDlg;
 	HANDLE m_ThreadID;
+
+	CMyUIThread*	  m_pMyUIThread;
 // Созданные функции схемы сообщений
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -79,6 +83,8 @@ public:
 	afx_msg void OnStartLocalCalc();
 protected:
 	afx_msg LRESULT OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam);
+public:
+	afx_msg void OnStartUithread();
 };
 
 

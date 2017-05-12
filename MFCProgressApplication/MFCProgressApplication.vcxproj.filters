@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\UIThread">
+      <UniqueIdentifier>{762880d4-b819-402e-b144-70d29242c4b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UIThread">
+      <UniqueIdentifier>{764c35e1-02f6-41dd-abb0-f5101229f7a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -60,6 +66,9 @@
     <ClInclude Include="ProgresDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyUIThread.h">
+      <Filter>Header Files\UIThread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCProgressApplication.cpp">
@@ -97,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="ProgresDialog.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyUIThread.cpp">
+      <Filter>Source Files\UIThread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
