@@ -10,7 +10,7 @@ class CProgresDialog : public CDialogEx
 
 public:
 	CProgresDialog(CWnd* pParent = NULL);   // standard constructor
-	//virtual ~CProgresDialog();
+	//~CProgresDialog();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME

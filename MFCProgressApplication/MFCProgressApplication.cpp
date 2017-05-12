@@ -22,7 +22,7 @@
 BEGIN_MESSAGE_MAP(CMFCProgressApplicationApp, CWinAppEx)
 	ON_COMMAND(ID_APP_ABOUT, &CMFCProgressApplicationApp::OnAppAbout)
 	// Стандартные команды по работе с файлами документов
-	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
+	ON_COMMAND(ID_FILE_NEW, OnMyFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
 	// Стандартная команда настройки печати
 	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
@@ -136,8 +136,7 @@ BOOL CMFCProgressApplicationApp::InitInstance()
 	// Синтаксический разбор командной строки на стандартные команды оболочки, DDE, открытие файлов
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-
-
+	
 
 	// Команды диспетчеризации, указанные в командной строке.  Значение FALSE будет возвращено, если
 	// приложение было запущено с параметром /RegServer, /Register, /Unregserver или /Unregister.
@@ -198,6 +197,12 @@ void CMFCProgressApplicationApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
+}
+
+void CMFCProgressApplicationApp::OnMyFileNew()
+{
+	// базовый вызов
+	CWinAppEx::OnFileNew();
 }
 
 // CMFCProgressApplicationApp настройка методов загрузки и сохранения

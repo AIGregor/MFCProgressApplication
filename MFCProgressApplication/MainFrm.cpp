@@ -455,7 +455,7 @@ void CMainFrame::InitProgressBarDlg()
 	pProgressBarDlg->ShowWindow(SW_SHOW);
 	pProgressBarDlg->CenterWindow(AfxGetMainWnd());
 	//CFrameWnd* pMainFrame = GetParentFrame();
-	//this->EnableWindow(FALSE);
+	this->EnableWindow(FALSE);
 	pProgressBarDlg->EnableWindow(TRUE);
 }
 
@@ -487,6 +487,14 @@ void CMainFrame::CalculationProc()
 		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 		
+		if (i % 10 == 0) 
+		{
+			//BOOL CMDIChildWnd::Create(LPCTSTR lpszClassName, 
+			// CWinThread *pThread = AfxGetThread(); 
+			//theApp.OnMyFileNew();
+		}
+
+		//MessageBeep(MB_OK);
 		//bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
 		//while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		//{
@@ -504,8 +512,7 @@ void CMainFrame::CalculationProc()
 
 void CMainFrame::OnStartLocalCalc()
 {
-	InitProgressBarDlg();
-	
+	InitProgressBarDlg();	
 	::PostMessage(GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 }
 
@@ -520,6 +527,8 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 		++i;
 		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
+		
+
 		/*
 		bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
 		if (peekMess)

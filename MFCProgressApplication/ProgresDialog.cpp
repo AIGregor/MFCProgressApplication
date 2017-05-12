@@ -69,6 +69,7 @@ LRESULT CProgresDialog::OnCloseProgressBar(WPARAM, LPARAM)
 {
 	if (this)
 		this->DestroyWindow(); 
+	//KillTimer(1234);
 
 	return 0;
 }
