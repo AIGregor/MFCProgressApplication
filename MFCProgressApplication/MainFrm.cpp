@@ -34,6 +34,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_MESSAGE(STOP_CALCULATION, &CMainFrame::OnStopCalc)
 	ON_MESSAGE(CM_START_LOCAL_CALCULATION, &CMainFrame::OnCmStartlocalcalc)
 	ON_COMMAND(ID_START_UITHREAD, &CMainFrame::OnStartUithread)
+
+	ON_COMMAND(CM_START_INNER1_LOCAL_CALCULATION, &CMainFrame::OnInner1Calculation)
+	ON_COMMAND(CM_START_INNER2_LOCAL_CALCULATION, &CMainFrame::OnInner2Calculation)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -458,13 +461,21 @@ void CMainFrame::InitProgressBarDlg()
 	//CFrameWnd* pMainFrame = GetParentFrame();
 	//this->EnableWindow(FALSE);
 	pProgressBarDlg->EnableWindow(TRUE);
+	TRACE("InitProgressBarDlg - Finish\n");
 }
 
 
 DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter)
 {
 	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
-	//pThis->CalculationProc();
+	pThis->CalculationProc();
+	//pThis->InitProgressBarDlg();
+	return 0;
+}
+
+DWORD WINAPI CalculationNewTreadRoutine(__in LPVOID lpParameter)
+{
+	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
 	pThis->InitProgressBarDlg();
 	return 0;
 }
@@ -472,9 +483,9 @@ DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter)
 void CMainFrame::OnStartCalc()
 {
 	DWORD mythreadid;
-	//InitProgressBarDlg();
+	InitProgressBarDlg();
 	m_ThreadID = CreateThread(0, 0, CalculationRoutine, this, 0, &mythreadid);
-	CalculationProc();
+	//CalculationProc();
 	// TODO: Add your command handler code here
 }
 
@@ -484,10 +495,17 @@ void CMainFrame::CalculationProc()
 	int i = 0;
 	MSG msg;
 
+	pProgressBarDlg = new CProgresDialog(this);
+	pProgressBarDlg->DoModal();
+	//InitProgressBarDlg();
+	/*
 	while (i < 100)
 	{
 		++i;
-		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+
+		//m_pMyUIThread->SetPosProgress(i);
+
+		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 		
 		if (i % 10 == 0) 
@@ -508,31 +526,68 @@ void CMainFrame::CalculationProc()
 		//}
 		
 	}
-
-	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	*/
+	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
 	this->EnableWindow(TRUE);
 }
 
 void CMainFrame::OnStartLocalCalc()
 {
-	InitProgressBarDlg();	
-	::PostMessage(GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	//InitProgressBarDlg();	
+	pProgressBarDlg = new CProgresDialog(this);
+	pProgressBarDlg->DoModal();
+	TRACE("OnStartLocalCalc - Finish\n");
+	
+	//OnCmStartlocalcalc(0, 0);
+
+	//pProgressBarDlg = new CProgresDialog(this);
+	//pProgressBarDlg->DoModal();
+	//::PostMessage(GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 }
 
+HINSTANCE g_hinst;
 
 afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
 	MSG msg;
+	/*
+	HWND hwndPB;    // Handle of progress bar.
+	RECT rcClient;  // Client area of parent window.
+	int cyVScroll;  // Height of scroll bar arrow.
+	HWND hwndParent = this->GetSafeHwnd();
+	DWORD cb = 100;       // Size of file and count of bytes read.
 
+	InitCommonControls();
+	::GetClientRect(hwndParent, &rcClient);
+	cyVScroll = GetSystemMetrics(SM_CYVSCROLL);
+
+	hwndPB = CreateWindowEx(0, PROGRESS_CLASS, (LPTSTR)NULL,
+		WS_CHILD | WS_VISIBLE, rcClient.left,
+		rcClient.bottom - cyVScroll,
+		rcClient.right, cyVScroll,
+		hwndParent, (HMENU)0, g_hinst, NULL);
+
+	::SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, cb));
+
+	::SendMessage(hwndPB, PBM_SETSTEP, (WPARAM)1, 0);
+	*/
+
+	//InitProgressBarDlg();
+	TRACE("OnCmStartlocalcalc - Start\n");
 	while (i < 100)
 	{
 		++i;
+		//m_pMyUIThread->SetPosProgress(i);
 
-		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
-		
 
+		if (i == 30)
+			SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
+
+		if (i == 60)
+			SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
 		/*
 		bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
 		if (peekMess)
@@ -545,11 +600,23 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 		*/
 	}
 
-	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
-	this->EnableWindow(TRUE);
+	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	//this->EnableWindow(TRUE);
 	// TODO: Add your command handler code here
+	//::DestroyWindow(hwndPB);
 
+	TRACE("OnCmStartlocalcalc - Finish\n");
 	return 0;
+}
+
+void CMainFrame::OnInner1Calculation()
+{
+	TRACE("OnInner1Calculation - Finish\n");
+}
+
+void CMainFrame::OnInner2Calculation()
+{
+	TRACE("OnInner2Calculation - Finish\n");
 }
 
 
@@ -564,8 +631,17 @@ void CMainFrame::OnStartUithread()
 		m_pMyUIThread->SetParent(this);
 
 		m_pMyUIThread->CreateThread();
-		
-		CalculationProc();
+
+		/*
+		while (true)
+		{
+			if (m_pMyUIThread->IsRunning())
+			{
+				CalculationProc();
+				return;
+			}			
+		}			
+		*/
 		// не ясно зачем ??
 		//CWnd* pWnd = GetDlgItem(IDOK);
 		//pWnd->EnableWindow(FALSE);

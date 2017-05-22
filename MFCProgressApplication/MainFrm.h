@@ -15,7 +15,11 @@ class CProgresDialog;
 #define STOP_CALCULATION (WM_USER + 12)
 #define CM_START_LOCAL_CALCULATION (WM_USER + 13)
 
+#define CM_START_INNER1_LOCAL_CALCULATION (WM_USER + 14)
+#define CM_START_INNER2_LOCAL_CALCULATION (WM_USER + 15)
+
 DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter);
+DWORD WINAPI CalculationNewTreadRoutine(__in LPVOID lpParameter);
 
 class CMainFrame : public CMDIFrameWndEx
 {
@@ -81,10 +85,14 @@ protected:
 public:
 	afx_msg void OnStartCalc();
 	afx_msg void OnStartLocalCalc();
+
 protected:
 	afx_msg LRESULT OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam);
+
 public:
 	afx_msg void OnStartUithread();
+	afx_msg void OnInner1Calculation();
+	afx_msg void OnInner2Calculation();
 };
 
 

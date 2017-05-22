@@ -94,6 +94,8 @@
 #define IDC_RADIO4                      1005
 #define IDC_CHECK1                      1006
 #define IDC_TOTALTIME                   1007
+#define IDC_BUTTON1                     1008
+#define IDC_BT_DIALOG_CALC              1008
 #define ID_32771                        32771
 #define ID_START_CALC                   32772
 #define ID_32773                        32773
@@ -107,7 +109,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        316
 #define _APS_NEXT_COMMAND_VALUE         32777
-#define _APS_NEXT_CONTROL_VALUE         1008
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           311
 #endif
 #endif

@@ -34,6 +34,8 @@ BEGIN_MESSAGE_MAP(CProgresDialog, CDialogEx)
 	ON_MESSAGE(CLOSE_PROGRESS_BAR, OnCloseProgressBar)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDCANCEL_PROGRESS, &CProgresDialog::OnBnClickedProgress)
+	ON_WM_SHOWWINDOW()
+	ON_BN_CLICKED(IDC_BT_DIALOG_CALC, &CProgresDialog::OnBnClickedBtDialogCalc)
 END_MESSAGE_MAP()
 
 
@@ -44,13 +46,15 @@ BOOL CProgresDialog::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	TRACE("OnInitDialog - Start\n");
+
 	// TODO:  Add extra initialization here
 	ComputerTime = GetTickCount();
 
 	m_ProgressBar.SetRange(0, 100);
 	m_ProgressBar.SetPos(0);
 	m_nTimer = SetTimer(1234, 1000, NULL);
-
+	
 	return TRUE;  
 }
 
@@ -67,8 +71,8 @@ LRESULT CProgresDialog::OnUpdateProgressBar(WPARAM wparam, LPARAM lparam)
 
 LRESULT CProgresDialog::OnCloseProgressBar(WPARAM, LPARAM)
 {
-	if (this)
-		this->DestroyWindow(); 
+	//if (this)
+	//	this->DestroyWindow(); 
 	//KillTimer(1234);
 
 	return 0;
@@ -108,6 +112,42 @@ void CProgresDialog::OnTimer(UINT_PTR nIDEvent)
 void CProgresDialog::OnBnClickedProgress()
 {
 	// TODO: Add your control notification handler code here
-	CFrameWnd* pMainWnd = GetParentFrame();
-	::PostMessage(pMainWnd->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
+	//CFrameWnd* pMainWnd = GetParentFrame();
+	//::PostMessage(pMainWnd->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
+	::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	//OnCloseProgressBar((WPARAM)0, (LPARAM)0);
+}
+
+
+void CProgresDialog::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialogEx::OnShowWindow(bShow, nStatus);
+
+	TRACE("OnShowWindow - Finish\n");
+	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	// TODO: Add your message handler code here
+}
+
+
+void CProgresDialog::OnBnClickedBtDialogCalc()
+{
+	// TODO: Add your control notification handler code here
+	TRACE("Вычисления в Диалоге - Start\n");
+	int i = 0;
+	while (i < 100)
+	{
+		++i;
+		m_ProgressBar.SetPos(i);
+
+		//m_pMyUIThread->SetPosProgress(i);
+
+		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
+		Sleep(100);
+
+		if (i == 30)
+			::SendMessage(::GetParent(this->GetSafeHwnd()), WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION, 0);
+		if (i == 60)
+			::SendMessage(::GetParent(this->GetSafeHwnd()),WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION, 0);
+	}
+	TRACE("Вычисления в Диалоге - Finish\n");
 }
