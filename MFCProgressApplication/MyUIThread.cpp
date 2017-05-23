@@ -1,6 +1,8 @@
 /*
 *	Пользовательский класс потока для вывода
 *	диалога с индикатором програсса
+*
+*	Поток графического интерфейса пользователя
 */
 
 // MyUIThread.cpp : implementation file
@@ -45,16 +47,14 @@ END_MESSAGE_MAP()
 
 //-------------------------------------------
 int CMyUIThread::Run()
-{
-
-	/*
-	BOOL ret = m_ProgressDlg.Create(IDD_PROGRESDIALOG);
-	if (!ret)
-	{
-		AfxMessageBox(_T("Error creating Dialog"));
-		delete m_ProgressDlg;
-	}
-	*/
+{	
+	//BOOL ret = m_ProgressDlg.Create(IDD_PROGRESDIALOG);
+	//if (!ret)
+	//{
+	//	AfxMessageBox(_T("Error creating Dialog"));
+	//	delete m_ProgressDlg;
+	//}
+	
 	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, 0, 0);
 	//m_ProgressDlg.DoModal();
 	
@@ -64,10 +64,14 @@ int CMyUIThread::Run()
 		AfxMessageBox(_T("Error creating Dialog"));
 		delete m_ProgressDlg;
 	}
+	m_ProgressDlg.setMainWnd(m_pParentWnd);
+
 	m_ProgressDlg.ShowWindow(SW_SHOW);
 	m_ProgressDlg.CenterWindow(m_pParentWnd);
 
-	::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	
+	CWinThread::Run();
 
 	m_bKill = FALSE;
 	m_bRunning = TRUE;

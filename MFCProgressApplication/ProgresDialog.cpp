@@ -114,7 +114,9 @@ void CProgresDialog::OnBnClickedProgress()
 	// TODO: Add your control notification handler code here
 	//CFrameWnd* pMainWnd = GetParentFrame();
 	//::PostMessage(pMainWnd->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
-	::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+
+	CWnd* pMainWnd = m_MainFrame;
+	::PostMessage(pMainWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 	//OnCloseProgressBar((WPARAM)0, (LPARAM)0);
 }
 
@@ -145,9 +147,9 @@ void CProgresDialog::OnBnClickedBtDialogCalc()
 		Sleep(100);
 
 		if (i == 30)
-			::SendMessage(::GetParent(this->GetSafeHwnd()), WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION, 0);
+			::PostMessage(::GetParent(this->GetSafeHwnd()), WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION, 0);
 		if (i == 60)
-			::SendMessage(::GetParent(this->GetSafeHwnd()),WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION, 0);
+			::PostMessage(::GetParent(this->GetSafeHwnd()),WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION, 0);
 	}
 	TRACE("Вычисления в Диалоге - Finish\n");
 }

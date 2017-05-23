@@ -16,10 +16,11 @@ public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_PROGRESDIALOG };
 #endif
-
+	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	CWnd* m_MainFrame;
 public:
 
 	CStatic m_Progress;
@@ -27,7 +28,12 @@ public:
 	unsigned int ComputerTime;
 	DWORD m_nTimer;
 
-	CProgressCtrl m_ProgressBar;
+	CProgressCtrl m_ProgressBar;	
+
+	void setMainWnd(CWnd* pParent) 
+	{ 
+		m_MainFrame = pParent; 
+	};
 
 	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnInitDialog();

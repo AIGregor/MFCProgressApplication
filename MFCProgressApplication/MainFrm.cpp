@@ -480,6 +480,9 @@ DWORD WINAPI CalculationNewTreadRoutine(__in LPVOID lpParameter)
 	return 0;
 }
 
+
+// Вополнение рассчетов в новом потоке и отображение диалогового окна в осонвном потоке 
+// Меню - ... новый поток
 void CMainFrame::OnStartCalc()
 {
 	DWORD mythreadid;
@@ -547,6 +550,8 @@ void CMainFrame::OnStartLocalCalc()
 
 HINSTANCE g_hinst;
 
+
+// Вычисления выполняемые из нового пользовательского потока
 afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
@@ -619,19 +624,23 @@ void CMainFrame::OnInner2Calculation()
 	TRACE("OnInner2Calculation - Finish\n");
 }
 
-
+// Создание нового потока пользовательского интерфейса
+// Расчеты в главном потоке, диалог в новом.
 void CMainFrame::OnStartUithread()
 {
 	// TODO: Add your command handler code here
 	// Вызов диалога с прогресс баром через user - interface thread 
 	//if (m_pMyUIThread == NULL)
 	//{
-		m_pMyUIThread = new CMyUIThread();
-		m_pMyUIThread->m_bAutoDelete = FALSE;
+		m_pMyUIThread = new CMyUIThread();		
 		m_pMyUIThread->SetParent(this);
 
 		m_pMyUIThread->CreateThread();
 
+		m_pMyUIThread->m_bAutoDelete = FALSE;
+
+		//OnCmStartlocalcalc((WPARAM)0, (LPARAM)0);
+		
 		/*
 		while (true)
 		{
