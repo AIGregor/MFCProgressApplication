@@ -116,7 +116,7 @@ void CProgresDialog::OnBnClickedProgress()
 	//::PostMessage(pMainWnd->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
 
 	CWnd* pMainWnd = m_MainFrame;
-	::PostMessage(pMainWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	//::PostMessage(pMainWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 	//OnCloseProgressBar((WPARAM)0, (LPARAM)0);
 }
 

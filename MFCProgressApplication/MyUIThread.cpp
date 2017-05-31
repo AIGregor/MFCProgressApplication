@@ -56,6 +56,7 @@ int CMyUIThread::Run()
 	//}
 	
 	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, 0, 0);
+	//m_ProgressDlg.setMainWnd(m_pParentWnd);
 	//m_ProgressDlg.DoModal();
 	
 	BOOL ret = m_ProgressDlg.Create(IDD_PROGRESDIALOG);
@@ -69,12 +70,16 @@ int CMyUIThread::Run()
 	m_ProgressDlg.ShowWindow(SW_SHOW);
 	m_ProgressDlg.CenterWindow(m_pParentWnd);
 
-	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
-	
-	CWinThread::Run();
+	m_pParentWnd->EnableWindow(FALSE);
 
+	//::PostMessage(m_pParentWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 	m_bKill = FALSE;
 	m_bRunning = TRUE;
+	
+	CWnd* pMainWnd = m_pParentWnd;
+	::PostMessage(pMainWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
+	
+	CWinThread::Run();
 
 	//m_bKill = TRUE;
 	//m_bRunning = FALSE;

@@ -583,8 +583,8 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 	while (i < 100)
 	{
 		++i;
-		//m_pMyUIThread->SetPosProgress(i);
 
+		m_pMyUIThread->SetPosProgress(i);
 		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 
