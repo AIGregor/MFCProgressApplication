@@ -9,8 +9,8 @@ class CProgresDialog : public CDialogEx
 	DECLARE_DYNAMIC(CProgresDialog)
 
 public:
-	CProgresDialog(CWnd* pParent = NULL);   // standard constructor
-	//~CProgresDialog();
+	explicit CProgresDialog(CWnd* pParent = nullptr);   // standard constructor
+	BOOL OnInitDialog() override;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -18,32 +18,31 @@ public:
 #endif
 	
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
-	CWnd* m_MainFrame;
-public:
 
-	CStatic m_Progress;
-	CStatic m_TotalProgressTime;
-	unsigned int ComputerTime;
-	DWORD m_nTimer;
+protected:
+	CWnd*			m_MainFrame;	
+	unsigned int	ComputerTime; // времы с момента запуска системы - изменить
+	DWORD			m_nTimer; // идентификатор нового таймера
 
-	CProgressCtrl m_ProgressBar;	
+	CProgressCtrl	m_ProgressBar; // Общий прогресс	
+	CStatic			m_TotalProgressTime; // общее время выполнения операции
 
-	void setMainWnd(CWnd* pParent) 
-	{ 
-		m_MainFrame = pParent; 
-	};
+	//CMyUIThread*	m_pMyUIThread;
+public:	
+	void setMainWnd(CWnd* pParent); // изменить указатель на главное окно
+	void setMainProgressPosition(int iPosition);
+	//void setCurrentThread(CMyUIThread* mCurrentThread);
 
-	DECLARE_MESSAGE_MAP()
-	virtual BOOL OnInitDialog();
+	DECLARE_MESSAGE_MAP()	
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg LRESULT OnUpdateProgressBar(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnCloseProgressBar(WPARAM, LPARAM);
-	afx_msg void PostNcDestroy();
+	afx_msg void PostNcDestroy() override;
 
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnBnClickedProgress();
+	afx_msg void OnBnStopCalculation();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnBnClickedBtDialogCalc();
 };

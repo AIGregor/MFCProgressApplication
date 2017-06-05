@@ -278,7 +278,6 @@ void CMainFrame::SetDockingWindowIcons(BOOL bHiColorIcons)
 }
 
 // диагностика CMainFrame
-
 #ifdef _DEBUG
 void CMainFrame::AssertValid() const
 {
@@ -293,7 +292,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 
 // обработчики сообщений CMainFrame
-
 void CMainFrame::OnWindowManager()
 {
 	ShowWindowsDialog();
@@ -446,7 +444,7 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 }
 
 //---------------------------------------------------------------
-
+// —оздание диалога в рабочем потоке и запуск вычислений в потоке данных
 void CMainFrame::InitProgressBarDlg()
 {
 	pProgressBarDlg = new CProgresDialog(this);
@@ -461,25 +459,17 @@ void CMainFrame::InitProgressBarDlg()
 	//CFrameWnd* pMainFrame = GetParentFrame();
 	//this->EnableWindow(FALSE);
 	pProgressBarDlg->EnableWindow(TRUE);
+
 	TRACE("InitProgressBarDlg - Finish\n");
 }
 
-
+// ћетод запускающий ф-цию рассчета в новом потоке данных
 DWORD WINAPI CalculationRoutine(__in LPVOID lpParameter)
 {
 	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
 	pThis->CalculationProc();
-	//pThis->InitProgressBarDlg();
 	return 0;
 }
-
-DWORD WINAPI CalculationNewTreadRoutine(__in LPVOID lpParameter)
-{
-	CMainFrame* pThis = static_cast<CMainFrame*>(lpParameter);
-	pThis->InitProgressBarDlg();
-	return 0;
-}
-
 
 // ¬ополнение рассчетов в новом потоке и отображение диалогового окна в осонвном потоке 
 // ћеню - ... новый поток
@@ -488,10 +478,9 @@ void CMainFrame::OnStartCalc()
 	DWORD mythreadid;
 	InitProgressBarDlg();
 	m_ThreadID = CreateThread(0, 0, CalculationRoutine, this, 0, &mythreadid);
-	//CalculationProc();
-	// TODO: Add your command handler code here
 }
 
+// ¬ыполн€ем вычислени€ в новом потоке данных
 void CMainFrame::CalculationProc()
 {
 	m_bStopCalculation = false;
@@ -534,58 +523,25 @@ void CMainFrame::CalculationProc()
 	this->EnableWindow(TRUE);
 }
 
+// —оздание диалога в рабочем потоке
 void CMainFrame::OnStartLocalCalc()
-{
-	//InitProgressBarDlg();	
+{	
 	pProgressBarDlg = new CProgresDialog(this);
 	pProgressBarDlg->DoModal();
 	TRACE("OnStartLocalCalc - Finish\n");
-	
-	//OnCmStartlocalcalc(0, 0);
-
-	//pProgressBarDlg = new CProgresDialog(this);
-	//pProgressBarDlg->DoModal();
-	//::PostMessage(GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
 }
-
-HINSTANCE g_hinst;
-
 
 // ¬ычислени€ выполн€емые из нового пользовательского потока
 afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
 	MSG msg;
-	/*
-	HWND hwndPB;    // Handle of progress bar.
-	RECT rcClient;  // Client area of parent window.
-	int cyVScroll;  // Height of scroll bar arrow.
-	HWND hwndParent = this->GetSafeHwnd();
-	DWORD cb = 100;       // Size of file and count of bytes read.
 
-	InitCommonControls();
-	::GetClientRect(hwndParent, &rcClient);
-	cyVScroll = GetSystemMetrics(SM_CYVSCROLL);
-
-	hwndPB = CreateWindowEx(0, PROGRESS_CLASS, (LPTSTR)NULL,
-		WS_CHILD | WS_VISIBLE, rcClient.left,
-		rcClient.bottom - cyVScroll,
-		rcClient.right, cyVScroll,
-		hwndParent, (HMENU)0, g_hinst, NULL);
-
-	::SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, cb));
-
-	::SendMessage(hwndPB, PBM_SETSTEP, (WPARAM)1, 0);
-	*/
-
-	//InitProgressBarDlg();
 	TRACE("OnCmStartlocalcalc - Start\n");
-	while (i < 100)
+	while ((i < 100) && m_pMyUIThread->IsRunning())
 	{
 		++i;
-
 		m_pMyUIThread->SetPosProgress(i);
-		//::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
 		Sleep(100);
 
 		if (i == 30)
@@ -593,32 +549,31 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 
 		if (i == 60)
 			SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
-		/*
+		
 		bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
 		if (peekMess)
 		{
 			if (msg.message == STOP_CALCULATION)
 			{
-				return;
+				break;
 			}
-		}
-		*/
+		}		
 	}
 
-	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
-	//this->EnableWindow(TRUE);
-	// TODO: Add your command handler code here
-	//::DestroyWindow(hwndPB);
-
+	m_pMyUIThread->myKill();
+	this->EnableWindow(TRUE);
+	
 	TRACE("OnCmStartlocalcalc - Finish\n");
 	return 0;
 }
 
+// ƒополнительный метод в рабочем потоке
 void CMainFrame::OnInner1Calculation()
 {
 	TRACE("OnInner1Calculation - Finish\n");
 }
 
+// ƒополнительный метод в рабочем потоке
 void CMainFrame::OnInner2Calculation()
 {
 	TRACE("OnInner2Calculation - Finish\n");
@@ -628,31 +583,10 @@ void CMainFrame::OnInner2Calculation()
 // –асчеты в главном потоке, диалог в новом.
 void CMainFrame::OnStartUithread()
 {
-	// TODO: Add your command handler code here
-	// ¬ызов диалога с прогресс баром через user - interface thread 
-	//if (m_pMyUIThread == NULL)
-	//{
-		m_pMyUIThread = new CMyUIThread();		
-		m_pMyUIThread->SetParent(this);
+	// ¬ызов диалога с прогресс баром через user-interface thread 
+	m_pMyUIThread = new CMyUIThread();		
+	m_pMyUIThread->SetParent(this);
+	m_pMyUIThread->CreateThread();
 
-		m_pMyUIThread->CreateThread();
-
-		m_pMyUIThread->m_bAutoDelete = FALSE;
-
-		//OnCmStartlocalcalc((WPARAM)0, (LPARAM)0);
-		
-		/*
-		while (true)
-		{
-			if (m_pMyUIThread->IsRunning())
-			{
-				CalculationProc();
-				return;
-			}			
-		}			
-		*/
-		// не €сно зачем ??
-		//CWnd* pWnd = GetDlgItem(IDOK);
-		//pWnd->EnableWindow(FALSE);
-	//}
+	//m_pMyUIThread->m_bAutoDelete = FALSE;	
 }
