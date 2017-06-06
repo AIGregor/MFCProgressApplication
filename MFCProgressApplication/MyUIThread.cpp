@@ -50,15 +50,11 @@ int CMyUIThread::Run()
 		delete m_ProgressDlg;
 	}
 	m_ProgressDlg.setMainWnd(m_pParentWnd);
-	//m_ProgressDlg.setCurrentThread(this);
 
 	m_ProgressDlg.ShowWindow(SW_SHOW);
 	m_ProgressDlg.CenterWindow(m_pParentWnd);
 	m_pParentWnd->EnableWindow(FALSE);
 
-	m_bKill = FALSE;
-	m_bRunning = TRUE;
-	
 	CWnd* pMainWnd = m_pParentWnd;
 	// Запуск вычислений
 	::PostMessage(pMainWnd->GetSafeHwnd(),
@@ -71,21 +67,22 @@ int CMyUIThread::Run()
 
 void CMyUIThread::Kill()
 {
-	if (!m_bKill) return;
 	m_ProgressDlg.PostMessageW(CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
 }
 
-void CMyUIThread::myKill()
+void CMyUIThread::SetPosTotalProgress(int iPosition)
 {
-	m_ProgressDlg.PostMessageW(CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	m_ProgressDlg.setTotalProgressPosition(iPosition);
 }
 
-void CMyUIThread::SetPosProgress(int iPosition)
+void CMyUIThread::SetPosStepProgress(int iPosition)
 {
-	if (IsRunning())
-	{
-		m_ProgressDlg.setMainProgressPosition(iPosition);
-	}
+	m_ProgressDlg.setStepProgressPosition(iPosition);
+}
+
+void CMyUIThread::SetCurrentOperationText(CString sCurrentOperationName)
+{
+	m_ProgressDlg.setCurrentOperationText(sCurrentOperationName);
 }
 
 void CMyUIThread::SetParent(CWnd * pParent)

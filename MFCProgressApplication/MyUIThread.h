@@ -33,9 +33,10 @@ public:
 
 	int Run() override; 
 	void Kill();
-	void myKill();
 	BOOL IsRunning() const { return m_bRunning; };
-	void SetPosProgress(int iPosition);
+	void SetPosTotalProgress(int iPosition);
+	void SetPosStepProgress(int iPosition);
+	void SetCurrentOperationText(CString sCurrentOperationName);
 	void SetParent(CWnd* pParent);
 
 private:

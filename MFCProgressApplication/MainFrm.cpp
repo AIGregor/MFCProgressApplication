@@ -519,7 +519,7 @@ void CMainFrame::CalculationProc()
 		
 	}
 	*/
-	::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
 	this->EnableWindow(TRUE);
 }
 
@@ -535,34 +535,51 @@ void CMainFrame::OnStartLocalCalc()
 afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
+	int j = 0;
+	bool bBreak = false;
 	MSG msg;
-
-	TRACE("OnCmStartlocalcalc - Start\n");
-	while ((i < 100) && m_pMyUIThread->IsRunning())
+	while (j < 3 && !bBreak)
 	{
-		++i;
-		m_pMyUIThread->SetPosProgress(i);
-		Sleep(100);
+		++j;
+		i = 0;
+		m_pMyUIThread->SetPosTotalProgress(j);
+		m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
 
-		if (i == 30)
-			SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
-
-		if (i == 60)
-			SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
-		
-		bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
-		if (peekMess)
+		TRACE("OnCmStartlocalcalc - Start\n");
+		while (i < 100 && !bBreak)
 		{
-			if (msg.message == STOP_CALCULATION)
+			++i;
+			m_pMyUIThread->SetPosStepProgress(i);
+			Sleep(100);
+
+			if (i == 30) 
 			{
-				break;
+				m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
+				SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
 			}
-		}		
+			
+			if (i == 60)
+			{
+				m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
+				SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
+			}				
+		
+			//bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
+			if (PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE))
+			{
+				if (msg.message == STOP_CALCULATION)
+				{
+					bBreak = true;
+					break;
+				}
+			}		
+		}
 	}
 
-	m_pMyUIThread->myKill();
-	this->EnableWindow(TRUE);
-	
+	m_pMyUIThread->Kill();
+	m_pMyUIThread->PostThreadMessage(WM_QUIT, 0, 0);
+
+	this->EnableWindow(TRUE);	
 	TRACE("OnCmStartlocalcalc - Finish\n");
 	return 0;
 }

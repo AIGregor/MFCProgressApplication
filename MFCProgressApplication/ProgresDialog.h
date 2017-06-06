@@ -1,7 +1,6 @@
 #pragma once
 
 // CProgresDialog dialog
-#define UPDATE_PROGRESS_BAR (WM_USER + 10)
 #define CLOSE_PROGRESS_BAR (WM_USER + 11)
 
 class CProgresDialog : public CDialogEx
@@ -18,29 +17,37 @@ public:
 #endif
 	
 protected:
-	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
-
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support	
 
 protected:
 	CWnd*			m_MainFrame;	
 	unsigned int	ComputerTime; // времы с момента запуска системы - изменить
-	DWORD			m_nTimer; // идентификатор нового таймера
 
-	CProgressCtrl	m_ProgressBar; // ќбщий прогресс	
-	CStatic			m_TotalProgressTime; // общее врем€ выполнени€ операции
+	CProgressCtrl	m_ProgressBarTotal; // ќбщий прогресс	
+	CProgressCtrl	m_ProgressBarStep; // ѕрогресс обработки одного листа
+	CStatic			m_stTotalProgressTime; // общее врем€ выполнени€ операции
+	CStatic			m_stProgressTimeStep; // врем€ выполнени€ врем€ выполнеин€ одного листа
+	CStatic			m_stCurrentStepName; // Ќазвание текущей операции
 
-	//CMyUIThread*	m_pMyUIThread;
+	DWORD			dwTotalTimerID;
+	DWORD			dwStepTimerID;
+	const UINT_PTR	uiptrTotalTimerIDEvent = 111;
+	const UINT_PTR	uiptrStepTimerIDEvent = 999;
+
+	BOOL			bResetStepTimer;
+
 public:	
 	void setMainWnd(CWnd* pParent); // изменить указатель на главное окно
-	void setMainProgressPosition(int iPosition);
+	void setTotalProgressPosition(int iPosition);
+	void setStepProgressPosition(int iPosition);
+	void setCurrentOperationText(CString sCurrentOpretion);
+
 	//void setCurrentThread(CMyUIThread* mCurrentThread);
 
 	DECLARE_MESSAGE_MAP()	
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg LRESULT OnUpdateProgressBar(WPARAM wparam, LPARAM lparam);
-	afx_msg LRESULT OnCloseProgressBar(WPARAM, LPARAM);
 	afx_msg void PostNcDestroy() override;
-
+	afx_msg LRESULT OnCloseProgressBar(WPARAM, LPARAM);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnStopCalculation();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);

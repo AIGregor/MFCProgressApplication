@@ -8,14 +8,13 @@
 #include "MainFrm.h"
 
 // CProgresDialog dialog
-
 IMPLEMENT_DYNAMIC(CProgresDialog, CDialogEx)
 
 CProgresDialog::CProgresDialog(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_PROGRESDIALOG, pParent), 
 		m_MainFrame(nullptr), 
 		ComputerTime(0), 
-		m_nTimer(0)
+		dwTotalTimerID(0)
 {
 }
 
@@ -23,14 +22,12 @@ void CProgresDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_PROGRESS_CONTROL, m_ProgressBar);
-	DDX_Control(pDX, IDC_TOTALTIME, m_TotalProgressTime);
+	DDX_Control(pDX, IDC_PROGRESS_CONTROL, m_ProgressBarTotal);
+	DDX_Control(pDX, IDC_PROGRESS_STEP, m_ProgressBarStep);
+	DDX_Control(pDX, IDC_TOTALTIME, m_stTotalProgressTime);
+	DDX_Control(pDX, IDC_STATIC_TIME_STEP, m_stProgressTimeStep);
+	DDX_Control(pDX, IDC_STATIC_NAME_STEP, m_stCurrentStepName);
 }
-
-//void CProgresDialog::setCurrentThread(CMyUIThread* mCurrentThread)
-//{
-//	m_pMyUIThread = mCurrentThread;
-//}
 
 BEGIN_MESSAGE_MAP(CProgresDialog, CDialogEx)
 	ON_WM_SYSCOMMAND()
@@ -38,7 +35,6 @@ BEGIN_MESSAGE_MAP(CProgresDialog, CDialogEx)
 	ON_WM_CLOSE()	
 	ON_WM_SHOWWINDOW()	
 	ON_WM_TIMER()
-	ON_MESSAGE(UPDATE_PROGRESS_BAR, OnUpdateProgressBar)
 	ON_MESSAGE(CLOSE_PROGRESS_BAR, OnCloseProgressBar)
 	ON_BN_CLICKED(IDCANCEL_PROGRESS, OnBnStopCalculation)
 	ON_BN_CLICKED(IDC_BT_DIALOG_CALC, &CProgresDialog::OnBnClickedBtDialogCalc)
@@ -51,14 +47,19 @@ BOOL CProgresDialog::OnInitDialog()
 	CDialogEx::OnInitDialog();
 	TRACE("OnInitDialog - Start\n");
 	// Инициализация прогресса
-	m_ProgressBar.SetRange(0, 100);
-	m_ProgressBar.SetPos(0);
+	m_ProgressBarTotal.SetRange(0, 3);
+	m_ProgressBarTotal.SetPos(0);
+
+	m_ProgressBarStep.SetRange(0, 100);
+	m_ProgressBarStep.SetPos(0);
+
 	// Инициализация таймера
 	ComputerTime = GetTickCount();
-	m_nTimer = SetTimer(1234, 1000, NULL);
+	dwTotalTimerID = SetTimer(uiptrTotalTimerIDEvent, 1000, NULL);
+	dwStepTimerID = SetTimer(uiptrStepTimerIDEvent, 1000, NULL);
 	// Очистка текста
-	m_TotalProgressTime.SetWindowTextW(L"");
-
+	m_stTotalProgressTime.SetWindowTextW(L"");
+	m_stProgressTimeStep.SetWindowTextW(L"");
 	return TRUE;  
 }
 
@@ -66,20 +67,14 @@ void CProgresDialog::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	CDialogEx::OnSysCommand(nID, lParam);
 }
-
-LRESULT CProgresDialog::OnUpdateProgressBar(WPARAM wparam, LPARAM lparam)
-{
-	m_ProgressBar.SetPos(wparam);
-	return 0;
-}
-
 // Закрытие окна диалога
 LRESULT CProgresDialog::OnCloseProgressBar(WPARAM, LPARAM)
 {
-	if (this)
-		this->DestroyWindow(); 
-	//KillTimer(1234);
+	KillTimer(dwTotalTimerID);
+	KillTimer(dwStepTimerID);
 
+	if (this)
+		this->DestroyWindow();
 	return 0;
 }
 
@@ -90,40 +85,35 @@ void CProgresDialog::PostNcDestroy()
 
 void CProgresDialog::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: Add your message handler code here and/or call default
-	unsigned long CurTickValue = GetTickCount();
-	unsigned int Difference = CurTickValue - ComputerTime;
+	if (nIDEvent == uiptrTotalTimerIDEvent) 
+	{
+		// TODO: Add your message handler code here and/or call default
+		unsigned long CurTickValue = GetTickCount();
+		unsigned int Difference = CurTickValue - ComputerTime;
 
-	unsigned int ComputerHours, ComputerMinutes, ComputerSeconds;
-	unsigned int ApplicationHours, ApplicationMinutes, ApplicationSeconds;
+		unsigned int ApplicationHours, ApplicationMinutes, ApplicationSeconds;
+		ApplicationHours = (Difference / (3600 * 999)) % 24;
+		ApplicationMinutes = (Difference / (60 * 999)) % 60;
+		ApplicationSeconds = (Difference / 999) % 60;
+		CString val2;
+		val2.Format(_T("%d:%d:%d"),
+			ApplicationHours, ApplicationMinutes, ApplicationSeconds);
+		m_stTotalProgressTime.SetWindowTextW(val2);
+	} 
+	else if (nIDEvent == uiptrStepTimerIDEvent)
+	{
 
-	ComputerHours = (CurTickValue / (3600 * 999)) % 24;
-	ComputerMinutes = (CurTickValue / (60 * 999)) % 60;
-	ComputerSeconds = (CurTickValue / 999) % 60;
-	ApplicationHours = (Difference / (3600 * 999)) % 24;
-	ApplicationMinutes = (Difference / (60 * 999)) % 60;
-	ApplicationSeconds = (Difference / 999) % 60;
-	CString val2;
-	val2.Format(_T("%d:%d:%d"),
-	            ApplicationHours, ApplicationMinutes, ApplicationSeconds);
-	m_TotalProgressTime.SetWindowTextW(val2);
+	}
+		
 	UpdateData(FALSE);
-
 	CDialogEx::OnTimer(nIDEvent);
 }
 
 // Обработчик остановка выполнения операции
 void CProgresDialog::OnBnStopCalculation()
 {
-	// TODO: Add your control notification handler code here
-	//CFrameWnd* pMainWnd = GetParentFrame();
 	::PostMessage(m_MainFrame->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
-
-	//CWnd* pMainWnd = m_MainFrame;
-	//::PostMessage(pMainWnd->GetSafeHwnd(), CM_START_LOCAL_CALCULATION, (WPARAM)0, (LPARAM)0);
-	//OnCloseProgressBar((WPARAM)0, (LPARAM)0);	
 }
-
 
 void CProgresDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 {
@@ -140,7 +130,7 @@ void CProgresDialog::OnBnClickedBtDialogCalc()
 	while (i < 100)
 	{
 		++i;
-		m_ProgressBar.SetPos(i);
+		m_ProgressBarTotal.SetPos(i);
 
 		Sleep(100);
 
@@ -157,8 +147,22 @@ void CProgresDialog::setMainWnd(CWnd * pParent)
 	m_MainFrame = pParent;
 }
 
-void CProgresDialog::setMainProgressPosition(int iPosition)
+void CProgresDialog::setTotalProgressPosition(int iPosition)
 {
-	if (&m_ProgressBar != nullptr)
-		m_ProgressBar.SetPos(iPosition);
+	if (m_ProgressBarTotal)
+		m_ProgressBarTotal.SetPos(iPosition);
+}
+
+void CProgresDialog::setStepProgressPosition(int iPosition)
+{
+	if (m_ProgressBarStep)
+		m_ProgressBarStep.SetPos(iPosition);
+}
+
+
+
+void CProgresDialog::setCurrentOperationText(CString sCurrentOpretion)
+{
+	if (m_stCurrentStepName)
+		m_stCurrentStepName.SetWindowTextW(sCurrentOpretion);
 }
