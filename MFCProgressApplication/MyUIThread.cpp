@@ -66,16 +66,6 @@ int CMyUIThread::Run()
 		static_cast<WPARAM>(0),
 		static_cast<LPARAM>(0));
 
-	//m_ProgressDlg.DoModal();
-			
-	//if (CWinThread::Run())
-	//{
-	//	TRACE("RUN !!!");
-	//};
-		
-	//m_bKill = TRUE;
-	//m_bRunning = FALSE;
-
 	return CWinThread::Run();
 }
 
