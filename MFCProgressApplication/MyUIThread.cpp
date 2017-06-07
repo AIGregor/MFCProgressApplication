@@ -16,8 +16,7 @@
 IMPLEMENT_DYNCREATE(CMyUIThread, CWinThread)
 
 CMyUIThread::CMyUIThread() : 
-	m_bKill(FALSE),
-	m_bRunning(FALSE)
+	m_StopCalculation(FALSE)
 {	
 }
 
@@ -73,11 +72,14 @@ void CMyUIThread::Kill()
 void CMyUIThread::SetPosTotalProgress(int iPosition)
 {
 	m_ProgressDlg.setTotalProgressPosition(iPosition);
+	m_ProgressDlg.resetStepTimer();
+	m_StopCalculation = m_ProgressDlg.getStopCalculation();
 }
 
 void CMyUIThread::SetPosStepProgress(int iPosition)
 {
 	m_ProgressDlg.setStepProgressPosition(iPosition);
+	m_StopCalculation = m_ProgressDlg.getStopCalculation();
 }
 
 void CMyUIThread::SetCurrentOperationText(CString sCurrentOperationName)

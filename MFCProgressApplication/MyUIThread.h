@@ -12,9 +12,6 @@
 #include "ProgresDialog.h"
 
 // CMyUIThread
-
-#define WM_INFORM_CLOSE		WM_USER + 100
-
 class CMyUIThread : public CWinThread
 {
 	DECLARE_DYNCREATE(CMyUIThread)
@@ -25,15 +22,16 @@ protected:
 
 // Overrides
 public:
-	virtual BOOL InitInstance() override;
-	virtual int ExitInstance() override;
-
 	CMyUIThread();
 	virtual ~CMyUIThread();
+
+	virtual BOOL InitInstance() override;
+	virtual int ExitInstance() override;
 
 	int Run() override; 
 	void Kill();
 	BOOL IsRunning() const { return m_bRunning; };
+	BOOL IsStopCommand() const { return m_StopCalculation; };
 	void SetPosTotalProgress(int iPosition);
 	void SetPosStepProgress(int iPosition);
 	void SetCurrentOperationText(CString sCurrentOperationName);
@@ -41,10 +39,10 @@ public:
 
 private:
 	CWnd*	m_pParentWnd; // Родительское окно, к которому привязываемся 
-	BOOL	m_bKill; // Флаг для удаления потока
 	BOOL	m_bRunning; // Флаг - поток запущен
 	CProgresDialog m_ProgressDlg; // Диалог с прогрессом
-
+	BOOL	m_StopCalculation;
+	
 protected:
 	DECLARE_MESSAGE_MAP()
 };

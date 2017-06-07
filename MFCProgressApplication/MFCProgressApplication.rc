@@ -424,16 +424,16 @@ END
 
 IDD_PROGRESDIALOG DIALOGEX 0, 0, 327, 98
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Прогресс пакетной обработки"
+CAPTION "Пакетной обработки"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    PUSHBUTTON      "STOP",IDCANCEL_PROGRESS,130,72,66,14
+    PUSHBUTTON      "STOP",IDCANCEL_PROGRESS,130,77,66,14
     CONTROL         "",IDC_PROGRESS_CONTROL,"msctls_progress32",WS_BORDER,14,13,301,14
     LTEXT           "Общее время выполнения",IDC_TOTALTIME,14,30,75,8
     PUSHBUTTON      "Dialog Progress",IDC_BT_DIALOG_CALC,245,7,75,14,NOT WS_VISIBLE
-    CONTROL         "",IDC_PROGRESS_STEP,"msctls_progress32",WS_BORDER,14,42,302,14
-    LTEXT           "Время выполнения текущего шага",IDC_STATIC_TIME_STEP,255,60,60,8
-    LTEXT           "Имя текуцей операции",IDC_STATIC_NAME_STEP,14,60,224,8
+    CONTROL         "",IDC_PROGRESS_STEP,"msctls_progress32",WS_BORDER,13,42,302,14
+    LTEXT           "Время выполнения текущего шага",IDC_STATIC_TIME_STEP,14,59,60,8
+    RTEXT           "Имя текуцей операции",IDC_STATIC_NAME_STEP,91,59,224,8
 END
 
 

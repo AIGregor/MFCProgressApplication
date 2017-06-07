@@ -18,10 +18,12 @@ public:
 	
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support	
+	CString getTimeString(unsigned int uiTime);
 
 protected:
-	CWnd*			m_MainFrame;	
-	unsigned int	ComputerTime; // времы с момента запуска системы - изменить
+	CWnd*			m_MainFrame;
+	unsigned int	m_uiStartTotalTime; // время с момента запуска системы
+	unsigned int	m_uiStartStepTime; // время с момента запуска шага
 
 	CProgressCtrl	m_ProgressBarTotal; // Общий прогресс	
 	CProgressCtrl	m_ProgressBarStep; // Прогресс обработки одного листа
@@ -34,16 +36,17 @@ protected:
 	const UINT_PTR	uiptrTotalTimerIDEvent = 111;
 	const UINT_PTR	uiptrStepTimerIDEvent = 999;
 
-	BOOL			bResetStepTimer;
+	BOOL			bResetStepTimer; // Сброс таймера текущего шага
+	BOOL			m_bStopCalculation;
 
 public:	
 	void setMainWnd(CWnd* pParent); // изменить указатель на главное окно
 	void setTotalProgressPosition(int iPosition);
 	void setStepProgressPosition(int iPosition);
 	void setCurrentOperationText(CString sCurrentOpretion);
-
-	//void setCurrentThread(CMyUIThread* mCurrentThread);
-
+	void resetStepTimer();
+	BOOL getStopCalculation() const;
+	
 	DECLARE_MESSAGE_MAP()	
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void PostNcDestroy() override;

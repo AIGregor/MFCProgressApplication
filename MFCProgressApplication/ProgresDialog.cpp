@@ -13,8 +13,11 @@ IMPLEMENT_DYNAMIC(CProgresDialog, CDialogEx)
 CProgresDialog::CProgresDialog(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_PROGRESDIALOG, pParent), 
 		m_MainFrame(nullptr), 
-		ComputerTime(0), 
-		dwTotalTimerID(0)
+		m_uiStartTotalTime(0),
+		m_uiStartStepTime(0),
+		dwTotalTimerID(0),
+		bResetStepTimer(0),
+		m_bStopCalculation(0)
 {
 }
 
@@ -54,7 +57,9 @@ BOOL CProgresDialog::OnInitDialog()
 	m_ProgressBarStep.SetPos(0);
 
 	// Инициализация таймера
-	ComputerTime = GetTickCount();
+	m_uiStartTotalTime = GetTickCount();
+	m_uiStartStepTime = m_uiStartTotalTime;
+
 	dwTotalTimerID = SetTimer(uiptrTotalTimerIDEvent, 1000, NULL);
 	dwStepTimerID = SetTimer(uiptrStepTimerIDEvent, 1000, NULL);
 	// Очистка текста
@@ -84,35 +89,51 @@ void CProgresDialog::PostNcDestroy()
 }
 
 void CProgresDialog::OnTimer(UINT_PTR nIDEvent)
-{
+{		
+	// TODO: Add your message handler code here and/or call default
+	DWORD CurTickValue = GetTickCount();
+	unsigned int uiTotalTimer = CurTickValue - m_uiStartTotalTime;
+
+	if (bResetStepTimer)
+	{
+		m_uiStartStepTime = GetTickCount();
+		bResetStepTimer = false;
+	}
+	unsigned int uiStepTime = CurTickValue - m_uiStartStepTime;
+
 	if (nIDEvent == uiptrTotalTimerIDEvent) 
 	{
-		// TODO: Add your message handler code here and/or call default
-		unsigned long CurTickValue = GetTickCount();
-		unsigned int Difference = CurTickValue - ComputerTime;
-
-		unsigned int ApplicationHours, ApplicationMinutes, ApplicationSeconds;
-		ApplicationHours = (Difference / (3600 * 999)) % 24;
-		ApplicationMinutes = (Difference / (60 * 999)) % 60;
-		ApplicationSeconds = (Difference / 999) % 60;
-		CString val2;
-		val2.Format(_T("%d:%d:%d"),
-			ApplicationHours, ApplicationMinutes, ApplicationSeconds);
-		m_stTotalProgressTime.SetWindowTextW(val2);
-	} 
+		CString sTime = getTimeString(uiTotalTimer);
+		m_stTotalProgressTime.SetWindowTextW(sTime);
+	}
 	else if (nIDEvent == uiptrStepTimerIDEvent)
 	{
-
+		CString sTime = getTimeString(uiStepTime);
+		m_stProgressTimeStep.SetWindowTextW(sTime);
 	}
 		
 	UpdateData(FALSE);
 	CDialogEx::OnTimer(nIDEvent);
 }
 
+CString CProgresDialog::getTimeString(unsigned int uiTime)
+{
+	unsigned int uiHours, uiMinutes, uiSeconds;
+	uiHours =	(uiTime / (3600 * 1000)) % 24;
+	uiMinutes = (uiTime / (60 * 1000)) % 60;
+	uiSeconds = (uiTime / 1000) % 60;
+
+	CString sTotalTime;
+	sTotalTime.Format(_T("%d:%d:%d"), uiHours, uiMinutes, uiSeconds);
+
+	return sTotalTime;
+}
+
 // Обработчик остановка выполнения операции
 void CProgresDialog::OnBnStopCalculation()
 {
-	::PostMessage(m_MainFrame->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
+	m_bStopCalculation = TRUE;
+	//::PostMessage(m_MainFrame->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
 }
 
 void CProgresDialog::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -159,10 +180,18 @@ void CProgresDialog::setStepProgressPosition(int iPosition)
 		m_ProgressBarStep.SetPos(iPosition);
 }
 
-
-
 void CProgresDialog::setCurrentOperationText(CString sCurrentOpretion)
 {
 	if (m_stCurrentStepName)
 		m_stCurrentStepName.SetWindowTextW(sCurrentOpretion);
+}
+
+void CProgresDialog::resetStepTimer()
+{
+	bResetStepTimer = true;
+}
+
+BOOL CProgresDialog::getStopCalculation() const
+{
+	return m_bStopCalculation;
 }

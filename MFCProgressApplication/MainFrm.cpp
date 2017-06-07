@@ -536,7 +536,7 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
 	int j = 0;
-	bool bBreak = false;
+	bool bBreak = m_pMyUIThread->IsStopCommand();
 	MSG msg;
 	while (j < 3 && !bBreak)
 	{
@@ -564,15 +564,17 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 				SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
 			}				
 		
-			//bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
-			if (PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE))
-			{
-				if (msg.message == STOP_CALCULATION)
-				{
-					bBreak = true;
-					break;
-				}
-			}		
+			bBreak = m_pMyUIThread->IsStopCommand();
+
+			////bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
+			//if (PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE))
+			//{
+			//	if (msg.message == STOP_CALCULATION)
+			//	{
+			//		bBreak = true;
+			//		break;
+			//	}
+			//}		
 		}
 	}
 
