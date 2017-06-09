@@ -15,8 +15,8 @@
 // CMyUIThread
 IMPLEMENT_DYNCREATE(CMyUIThread, CWinThread)
 
-CMyUIThread::CMyUIThread() : 
-	m_StopCalculation(FALSE)
+CMyUIThread::CMyUIThread() : CWinThread(),
+	m_StopCalculation(FALSE)  
 {	
 }
 
@@ -27,6 +27,18 @@ CMyUIThread::~CMyUIThread()
 BOOL CMyUIThread::InitInstance()
 {
 	// TODO:  perform and per-thread initialization here
+	BOOL ret = m_ProgressDlg.Create(IDD_PROGRESDIALOG);
+	if (!ret)
+	{
+		AfxMessageBox(_T("Error creating Dialog"));
+		delete m_ProgressDlg;
+	}
+	m_ProgressDlg.setMainWnd(m_pParentWnd);
+
+	m_ProgressDlg.ShowWindow(SW_SHOW);
+	m_ProgressDlg.CenterWindow(m_pParentWnd);
+	//m_pParentWnd->EnableWindow(FALSE);
+
 	return TRUE;
 }
 
@@ -42,21 +54,8 @@ END_MESSAGE_MAP()
 //-------------------------------------------
 int CMyUIThread::Run()
 {
-	BOOL ret = m_ProgressDlg.Create(IDD_PROGRESDIALOG);
-	if (!ret)
-	{
-		AfxMessageBox(_T("Error creating Dialog"));
-		delete m_ProgressDlg;
-	}
-	m_ProgressDlg.setMainWnd(m_pParentWnd);
-
-	m_ProgressDlg.ShowWindow(SW_SHOW);
-	m_ProgressDlg.CenterWindow(m_pParentWnd);
-	m_pParentWnd->EnableWindow(FALSE);
-
-	CWnd* pMainWnd = m_pParentWnd;
 	// Запуск вычислений
-	::PostMessage(pMainWnd->GetSafeHwnd(),
+	::PostMessage(m_pParentWnd->GetSafeHwnd(),
 		CM_START_LOCAL_CALCULATION,
 		static_cast<WPARAM>(0),
 		static_cast<LPARAM>(0));

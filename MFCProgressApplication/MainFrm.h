@@ -94,6 +94,7 @@ public:
 	afx_msg void OnStartUithread();
 	afx_msg void OnInner1Calculation();
 	afx_msg void OnInner2Calculation();
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
 };
 
 

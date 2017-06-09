@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 
 	ON_COMMAND(CM_START_INNER1_LOCAL_CALCULATION, &CMainFrame::OnInner1Calculation)
 	ON_COMMAND(CM_START_INNER2_LOCAL_CALCULATION, &CMainFrame::OnInner2Calculation)
+	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -536,35 +537,36 @@ afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
 	int j = 0;
-	bool bBreak = m_pMyUIThread->IsStopCommand();
+	bool bBreak = FALSE; // m_pMyUIThread->IsStopCommand();
 	MSG msg;
 	while (j < 3 && !bBreak)
 	{
 		++j;
 		i = 0;
-		m_pMyUIThread->SetPosTotalProgress(j);
-		m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
+		//m_pMyUIThread->SetPosTotalProgress(j);
+		//m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
 
 		TRACE("OnCmStartlocalcalc - Start\n");
 		while (i < 100 && !bBreak)
 		{
 			++i;
-			m_pMyUIThread->SetPosStepProgress(i);
+			//m_pMyUIThread->SetPosStepProgress(i);
+			::PostMessage(m_pMyUIThread->getProgressDlgHandle(), UM_SETPOS_STEPPROGRESS, NULL, (LPARAM) i);
 			Sleep(100);
 
 			if (i == 30) 
 			{
-				m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
+				//m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
 				SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
 			}
 			
 			if (i == 60)
 			{
-				m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
+				//m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
 				SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
 			}				
 		
-			bBreak = m_pMyUIThread->IsStopCommand();		
+			//bBreak = m_pMyUIThread->IsStopCommand();		
 		}
 	}
 
@@ -592,10 +594,34 @@ void CMainFrame::OnInner2Calculation()
 // Расчеты в главном потоке, диалог в новом.
 void CMainFrame::OnStartUithread()
 {
-	// Вызов диалога с прогресс баром через user-interface thread 
-	m_pMyUIThread = new CMyUIThread();		
-	m_pMyUIThread->SetParent(this);
-	m_pMyUIThread->CreateThread();
+	//CMyUIThread* pMyUI = static_cast<CMyUIThread*>(AfxBeginThread(RUNTIME_CLASS(CMyUIThread)));
+	//pMyUI->SetParent(this);
 
+	// Вызов диалога с прогресс баром через user-interface thread 
+	m_pMyUIThread = new CMyUIThread();
+
+	if (m_pMyUIThread == NULL)
+		AfxThrowMemoryException();
+	ASSERT_VALID(m_pMyUIThread);
+	
+	m_pMyUIThread->SetParent(this);
+	// THREAD_PRIORITY_TIME_CRITICAL
+	if (!m_pMyUIThread->CreateThread())
+	{
+		m_pMyUIThread->Delete();
+	}
+
+	//m_pMyUIThread->SetThreadPriority(THREAD_PRIORITY_TIME_CRITICAL);
+
+	//OnCmStartlocalcalc(NULL, NULL);
 	//m_pMyUIThread->m_bAutoDelete = FALSE;	
+}
+
+
+void CMainFrame::OnSetFocus(CWnd* pOldWnd)
+{
+	TRACE("SET MAIN focus !!!\n");
+	CMDIFrameWndEx::OnSetFocus(pOldWnd);
+
+	// TODO: Add your message handler code here
 }

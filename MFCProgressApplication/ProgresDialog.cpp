@@ -5,7 +5,6 @@
 #include "MFCProgressApplication.h"
 #include "ProgresDialog.h"
 #include "afxdialogex.h"
-#include "MainFrm.h"
 
 // CProgresDialog dialog
 IMPLEMENT_DYNAMIC(CProgresDialog, CDialogEx)
@@ -39,8 +38,10 @@ BEGIN_MESSAGE_MAP(CProgresDialog, CDialogEx)
 	ON_WM_SHOWWINDOW()	
 	ON_WM_TIMER()
 	ON_MESSAGE(CLOSE_PROGRESS_BAR, OnCloseProgressBar)
+	ON_MESSAGE(UM_SETPOS_STEPPROGRESS, OnSetPosStepProgress)
 	ON_BN_CLICKED(IDCANCEL_PROGRESS, OnBnStopCalculation)
 	ON_BN_CLICKED(IDC_BT_DIALOG_CALC, &CProgresDialog::OnBnClickedBtDialogCalc)
+	ON_WM_KILLFOCUS()
 END_MESSAGE_MAP()
 
 
@@ -81,6 +82,13 @@ LRESULT CProgresDialog::OnCloseProgressBar(WPARAM, LPARAM)
 	if (this)
 		this->DestroyWindow();
 	return 0;
+}
+
+LRESULT CProgresDialog::OnSetPosStepProgress(WPARAM wParam, LPARAM lParam)
+{
+	if (m_ProgressBarStep)
+		m_ProgressBarStep.SetPos(lParam);
+	return LRESULT();
 }
 
 void CProgresDialog::PostNcDestroy()
@@ -133,7 +141,6 @@ CString CProgresDialog::getTimeString(unsigned int uiTime)
 void CProgresDialog::OnBnStopCalculation()
 {
 	m_bStopCalculation = TRUE;
-	//::PostMessage(m_MainFrame->GetSafeHwnd(), STOP_CALCULATION, (WPARAM)0, (LPARAM)0);
 }
 
 void CProgresDialog::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -155,10 +162,10 @@ void CProgresDialog::OnBnClickedBtDialogCalc()
 
 		Sleep(100);
 
-		if (i == 30)
-			::PostMessage(::GetParent(this->GetSafeHwnd()), WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION, 0);
-		if (i == 60)
-			::PostMessage(::GetParent(this->GetSafeHwnd()),WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION, 0);
+		if (i == 30);
+			//::PostMessage(::GetParent(this->GetSafeHwnd()), WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION, 0);
+		if (i == 60);
+			//::PostMessage(::GetParent(this->GetSafeHwnd()),WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION, 0);
 	}
 	TRACE("Вычисления в Диалоге - Finish\n");
 }
@@ -184,6 +191,7 @@ void CProgresDialog::setCurrentOperationText(CString sCurrentOpretion)
 {
 	if (m_stCurrentStepName)
 		m_stCurrentStepName.SetWindowTextW(sCurrentOpretion);
+	//UpdateData(FALSE);
 }
 
 void CProgresDialog::resetStepTimer()
@@ -194,4 +202,13 @@ void CProgresDialog::resetStepTimer()
 BOOL CProgresDialog::getStopCalculation() const
 {
 	return m_bStopCalculation;
+}
+
+
+void CProgresDialog::OnKillFocus(CWnd* pNewWnd)
+{
+	TRACE("KILL FOCUS !!! \n");
+	CDialogEx::OnKillFocus(pNewWnd);
+
+	// TODO: Add your message handler code here
 }

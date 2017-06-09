@@ -31,11 +31,13 @@ public:
 	int Run() override; 
 	void Kill();
 	BOOL IsRunning() const { return m_bRunning; };
-	BOOL IsStopCommand() const { return m_StopCalculation; };
+	BOOL IsStopCommand() const { return m_StopCalculation ? true : false; };
 	void SetPosTotalProgress(int iPosition);
 	void SetPosStepProgress(int iPosition);
 	void SetCurrentOperationText(CString sCurrentOperationName);
 	void SetParent(CWnd* pParent);
+
+	HWND getProgressDlgHandle() const { return m_ProgressDlg.GetSafeHwnd(); }
 
 private:
 	CWnd*	m_pParentWnd; // –одительское окно, к которому прив€зываемс€ 

@@ -2,6 +2,7 @@
 
 // CProgresDialog dialog
 #define CLOSE_PROGRESS_BAR (WM_USER + 11)
+#define UM_SETPOS_STEPPROGRESS (WM_USER + 12)
 
 class CProgresDialog : public CDialogEx
 {
@@ -50,9 +51,13 @@ public:
 	DECLARE_MESSAGE_MAP()	
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void PostNcDestroy() override;
+
 	afx_msg LRESULT OnCloseProgressBar(WPARAM, LPARAM);
+	afx_msg LRESULT OnSetPosStepProgress(WPARAM wParam, LPARAM lParam);
+
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnStopCalculation();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnBnClickedBtDialogCalc();
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 };
