@@ -20,6 +20,7 @@ public:
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support	
 	CString getTimeString(unsigned int uiTime);
+	void DoEvents();
 
 protected:
 	CWnd*			m_MainFrame;

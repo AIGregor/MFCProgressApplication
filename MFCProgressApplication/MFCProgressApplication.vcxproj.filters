@@ -69,6 +69,9 @@
     <ClInclude Include="MyUIThread.h">
       <Filter>Header Files\UIThread</Filter>
     </ClInclude>
+    <ClInclude Include="MyWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCProgressApplication.cpp">
@@ -109,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="MyUIThread.cpp">
       <Filter>Source Files\UIThread</Filter>
+    </ClCompile>
+    <ClCompile Include="MyWnd.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

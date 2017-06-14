@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_COMMAND(CM_START_INNER1_LOCAL_CALCULATION, &CMainFrame::OnInner1Calculation)
 	ON_COMMAND(CM_START_INNER2_LOCAL_CALCULATION, &CMainFrame::OnInner2Calculation)
 	ON_WM_SETFOCUS()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -458,7 +459,7 @@ void CMainFrame::InitProgressBarDlg()
 	pProgressBarDlg->ShowWindow(SW_SHOW);
 	pProgressBarDlg->CenterWindow(AfxGetMainWnd());
 	//CFrameWnd* pMainFrame = GetParentFrame();
-	//this->EnableWindow(FALSE);
+	this->EnableWindow(FALSE);
 	pProgressBarDlg->EnableWindow(TRUE);
 
 	TRACE("InitProgressBarDlg - Finish\n");
@@ -484,44 +485,47 @@ void CMainFrame::OnStartCalc()
 // Выполняем вычисления в новом потоке данных
 void CMainFrame::CalculationProc()
 {
-	m_bStopCalculation = false;
 	int i = 0;
-	MSG msg;
-
-	pProgressBarDlg = new CProgresDialog(this);
-	pProgressBarDlg->DoModal();
-	//InitProgressBarDlg();
-	/*
-	while (i < 100)
+	int j = 0;
+	bool bBreak = FALSE; // m_pMyUIThread->IsStopCommand();
+	while (j < 1 && !bBreak)
 	{
-		++i;
+		++j;
+		pProgressBarDlg->setTotalProgressPosition(j);
+		i = 0;
+		//m_pMyUIThread->SetPosTotalProgress(j);
+		//m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
 
-		//m_pMyUIThread->SetPosProgress(i);
-
-		::PostMessage(pProgressBarDlg->GetSafeHwnd(), UPDATE_PROGRESS_BAR, (WPARAM)static_cast<int>(i), (LPARAM)0);
-		Sleep(100);
-		
-		if (i % 10 == 0) 
+		TRACE("OnCmStartlocalcalc - Start\n");
+		while (i < 100 && !bBreak)
 		{
-			//BOOL CMDIChildWnd::Create(LPCTSTR lpszClassName, 
-			// CWinThread *pThread = AfxGetThread(); 
-			//theApp.OnMyFileNew();
-		}
+			++i;
+			pProgressBarDlg->setStepProgressPosition(i);
+			//m_pMyUIThread->SetPosStepProgress(i);
+			//::PostMessage(m_pMyUIThread->getProgressDlgHandle(), UM_SETPOS_STEPPROGRESS, NULL, (LPARAM)i);
+			Sleep(100);
 
-		//MessageBeep(MB_OK);
-		//bool peekMess = PeekMessage(&msg, this->GetSafeHwnd(), NULL, NULL, PM_NOREMOVE);
-		//while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
-		//{
-			if (m_bStopCalculation)
+			if (i == 30)
 			{
-				break;
+				//m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
+				SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
 			}
-		//}
-		
+
+			if (i == 60)
+			{
+				//m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
+				SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
+			}
+
+			//bBreak = m_pMyUIThread->IsStopCommand();		
+		}
 	}
-	*/
-	//::PostMessage(pProgressBarDlg->GetSafeHwnd(), CLOSE_PROGRESS_BAR, (WPARAM)0, (LPARAM)0);
+
+	//m_pMyUIThread->Kill();
+	//m_pMyUIThread->PostThreadMessage(WM_QUIT, 0, 0);
+
 	this->EnableWindow(TRUE);
+	TRACE("OnCmStartlocalcalc - Finish\n");
 }
 
 // Создание диалога в рабочем потоке
@@ -532,41 +536,92 @@ void CMainFrame::OnStartLocalCalc()
 	TRACE("OnStartLocalCalc - Finish\n");
 }
 
+void  CMainFrame::DoEvents()
+{
+	MSG msg;
+	BOOL result;
+
+	while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	{
+		result = ::GetMessage(&msg, NULL, 0, 0);
+		if (result == 0) // WM_QUIT
+		{
+			::PostQuitMessage(msg.wParam);
+			break;
+		}
+		else if (result == -1)
+		{
+			// Handle errors/exit application, etc.
+		}
+		else
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+	}
+}
+
 // Вычисления выполняемые из нового пользовательского потока
 afx_msg LRESULT CMainFrame::OnCmStartlocalcalc(WPARAM wParam, LPARAM lParam)
 {
+	//----------------------------------------------
+
+	m_pMyUIThread = new CMyUIThread();
+	if (m_pMyUIThread == NULL)
+		AfxThrowMemoryException();
+
+	ASSERT_VALID(m_pMyUIThread);
+	m_pMyUIThread->SetParent(this);
+	if (!m_pMyUIThread->CreateThread())
+	{
+		m_pMyUIThread->Delete();
+	}
+
+	while (!m_pMyUIThread->IsRunning()) 
+	{
+		TRACE("Waiting... Creating UI thread!\n");
+		DoEvents();
+	}
+
+	//-----------------------------------------------
+
 	int i = 0;
 	int j = 0;
-	bool bBreak = FALSE; // m_pMyUIThread->IsStopCommand();
+	bool bBreak = m_pMyUIThread->IsStopCommand();
 	MSG msg;
 	while (j < 3 && !bBreak)
 	{
 		++j;
 		i = 0;
-		//m_pMyUIThread->SetPosTotalProgress(j);
-		//m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
+
+		CMyWnd* pMyWnd = new CMyWnd();
+		this->CreateNewWindow(L"NewWnd", pMyWnd);
+		m_pMyUIThread->SetPosTotalProgress(j);
+		m_pMyUIThread->SetCurrentOperationText(L"START MAIN WHILE CYCLE !!!");
 
 		TRACE("OnCmStartlocalcalc - Start\n");
 		while (i < 100 && !bBreak)
 		{
-			++i;
-			//m_pMyUIThread->SetPosStepProgress(i);
+			++i;			
+			DoEvents();
+
+			m_pMyUIThread->SetPosStepProgress(i);
 			::PostMessage(m_pMyUIThread->getProgressDlgHandle(), UM_SETPOS_STEPPROGRESS, NULL, (LPARAM) i);
 			Sleep(100);
 
 			if (i == 30) 
 			{
-				//m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
+				m_pMyUIThread->SetCurrentOperationText(L"START_INNER1_LOCAL_CALCULATION 11111");
 				SendMessage(WM_COMMAND, CM_START_INNER1_LOCAL_CALCULATION);
 			}
 			
 			if (i == 60)
 			{
-				//m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
+				m_pMyUIThread->SetCurrentOperationText(L"INNER_LOCAL_CALCULATION 22222");
 				SendMessage(WM_COMMAND, CM_START_INNER2_LOCAL_CALCULATION);
 			}				
 		
-			//bBreak = m_pMyUIThread->IsStopCommand();		
+			bBreak = m_pMyUIThread->IsStopCommand();		
 		}
 	}
 
@@ -598,22 +653,31 @@ void CMainFrame::OnStartUithread()
 	//pMyUI->SetParent(this);
 
 	// Вызов диалога с прогресс баром через user-interface thread 
-	m_pMyUIThread = new CMyUIThread();
 
-	if (m_pMyUIThread == NULL)
-		AfxThrowMemoryException();
-	ASSERT_VALID(m_pMyUIThread);
-	
-	m_pMyUIThread->SetParent(this);
-	// THREAD_PRIORITY_TIME_CRITICAL
-	if (!m_pMyUIThread->CreateThread())
-	{
-		m_pMyUIThread->Delete();
-	}
+	//m_pMyUIThread = new CMyUIThread();
+
+	//if (m_pMyUIThread == NULL)
+	//	AfxThrowMemoryException();
+	//ASSERT_VALID(m_pMyUIThread);
+	//
+	//m_pMyUIThread->SetParent(this);
+
+	//if (!m_pMyUIThread->CreateThread())
+	////if (!m_pMyUIThread->CreateThread(NULL, NULL, CalculationRoutine))
+	//{
+	//	m_pMyUIThread->Delete();
+	//}
+
+	//DWORD dwDoEventsTimer = SetTimer(123, 100, NULL);
+
+	//DWORD mythreadid;
+	//m_ThreadID = CreateThread(0, 0, CalculationRoutine, this, 0, &mythreadid);
 
 	//m_pMyUIThread->SetThreadPriority(THREAD_PRIORITY_TIME_CRITICAL);
 
-	//OnCmStartlocalcalc(NULL, NULL);
+	PostMessage(CM_START_LOCAL_CALCULATION,
+			static_cast<WPARAM>(0),
+			static_cast<LPARAM>(0));
 	//m_pMyUIThread->m_bAutoDelete = FALSE;	
 }
 
@@ -624,4 +688,13 @@ void CMainFrame::OnSetFocus(CWnd* pOldWnd)
 	CMDIFrameWndEx::OnSetFocus(pOldWnd);
 
 	// TODO: Add your message handler code here
+}
+
+
+void CMainFrame::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	DoEvents();
+
+	CMDIFrameWndEx::OnTimer(nIDEvent);
 }

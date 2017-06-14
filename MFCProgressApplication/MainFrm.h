@@ -9,6 +9,7 @@
 #include "PropertiesWnd.h"
 
 #include "MyUIThread.h"
+#include "MyWnd.h"
 
 class CProgresDialog;
 
@@ -49,6 +50,7 @@ public:
 
 	void CalculationProc();
 	void InitProgressBarDlg();
+	void DoEvents();
 
 protected:  // встроенные члены панели элементов управления
 	CMFCMenuBar       m_wndMenuBar;
@@ -68,6 +70,7 @@ protected:  // встроенные члены панели элементов управления
 	CMyUIThread*	  m_pMyUIThread;
 // Созданные функции схемы сообщений
 protected:
+
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnWindowManager();
 	afx_msg void OnViewCustomize();
@@ -95,6 +98,7 @@ public:
 	afx_msg void OnInner1Calculation();
 	afx_msg void OnInner2Calculation();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
 
 

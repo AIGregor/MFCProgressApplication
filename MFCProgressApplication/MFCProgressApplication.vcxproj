@@ -193,6 +193,7 @@
     <ClInclude Include="MFCProgressApplicationDoc.h" />
     <ClInclude Include="MFCProgressApplicationView.h" />
     <ClInclude Include="MyUIThread.h" />
+    <ClInclude Include="MyWnd.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="ProgresDialog.h" />
     <ClInclude Include="PropertiesWnd.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="MFCProgressApplicationDoc.cpp" />
     <ClCompile Include="MFCProgressApplicationView.cpp" />
     <ClCompile Include="MyUIThread.cpp" />
+    <ClCompile Include="MyWnd.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="ProgresDialog.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />

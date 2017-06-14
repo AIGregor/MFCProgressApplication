@@ -33,7 +33,6 @@ void CProgresDialog::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CProgresDialog, CDialogEx)
 	ON_WM_SYSCOMMAND()
-	ON_WM_TIMER()
 	ON_WM_CLOSE()	
 	ON_WM_SHOWWINDOW()	
 	ON_WM_TIMER()
@@ -120,7 +119,7 @@ void CProgresDialog::OnTimer(UINT_PTR nIDEvent)
 		m_stProgressTimeStep.SetWindowTextW(sTime);
 	}
 		
-	UpdateData(FALSE);
+	UpdateData(FALSE);	
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -135,6 +134,31 @@ CString CProgresDialog::getTimeString(unsigned int uiTime)
 	sTotalTime.Format(_T("%d:%d:%d"), uiHours, uiMinutes, uiSeconds);
 
 	return sTotalTime;
+}
+
+void CProgresDialog::DoEvents()
+{
+	MSG msg;
+	BOOL result;
+
+	while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	{
+		result = ::GetMessage(&msg, NULL, 0, 0);
+		if (result == 0) // WM_QUIT
+		{
+			::PostQuitMessage(msg.wParam);
+			break;
+		}
+		else if (result == -1)
+		{
+			// Handle errors/exit application, etc.
+		}
+		else
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+	}
 }
 
 // Обработчик остановка выполнения операции

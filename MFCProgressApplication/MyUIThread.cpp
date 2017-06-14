@@ -16,7 +16,8 @@
 IMPLEMENT_DYNCREATE(CMyUIThread, CWinThread)
 
 CMyUIThread::CMyUIThread() : CWinThread(),
-	m_StopCalculation(FALSE)  
+	m_StopCalculation(FALSE),
+	m_bRunning(FALSE)
 {	
 }
 
@@ -37,7 +38,7 @@ BOOL CMyUIThread::InitInstance()
 
 	m_ProgressDlg.ShowWindow(SW_SHOW);
 	m_ProgressDlg.CenterWindow(m_pParentWnd);
-	//m_pParentWnd->EnableWindow(FALSE);
+	m_pParentWnd->EnableWindow(FALSE);
 
 	return TRUE;
 }
@@ -55,11 +56,11 @@ END_MESSAGE_MAP()
 int CMyUIThread::Run()
 {
 	// Запуск вычислений
-	::PostMessage(m_pParentWnd->GetSafeHwnd(),
-		CM_START_LOCAL_CALCULATION,
-		static_cast<WPARAM>(0),
-		static_cast<LPARAM>(0));
-
+	//::PostMessage(m_pParentWnd->GetSafeHwnd(),
+	//	CM_START_LOCAL_CALCULATION,
+	//	static_cast<WPARAM>(0),
+	//	static_cast<LPARAM>(0));
+	m_bRunning = true;
 	return CWinThread::Run();
 }
 
